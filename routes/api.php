@@ -26,7 +26,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::post('/login', [AuthController::class, 'login']);
 
     Route::post('password/forgot-password', [NewPasswordController::class, 'forgotPassword']);
-    Route::post('reset', [NewPasswordController::class, 'reset']);
+    Route::post('password/reset', [NewPasswordController::class, 'reset']);
 
 });
 
@@ -35,9 +35,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('/email/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
    
  });
-         // social login impimentation
-// Route::get('redirect/{driver}', 'Auth\LoginController@redirectToProvider');
-// Route::get('{driver}/callback', 'Auth\LoginController@handleProviderCallback');
+         
 
 Route::middleware('auth:sanctum','verified')->get('/user', function (Request $request) {
     return $request->user();

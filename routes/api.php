@@ -27,12 +27,13 @@ Route::group(['prefix' => 'v1'], function () {
 
     Route::post('password/forgot-password', [NewPasswordController::class, 'forgotPassword']);
     Route::post('password/reset', [NewPasswordController::class, 'reset']);
+    Route::get('/email/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+
 
 });
 
  Route::group(  ['middleware'=> ['auth:sanctum'],  'prefix' => 'v1' ], function () {  
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/email/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
    
  });
          

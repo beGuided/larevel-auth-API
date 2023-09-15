@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+
 
 
 class AuthController extends Controller
@@ -40,36 +40,35 @@ class AuthController extends Controller
        
         $response = [
             'message' => 'Registration successful. Please check your email for verification link.',
-             'user'=> $formFields, 'token' => $token   ];
+             'user'=> $user, 'token' => $token   ];
         return response($response, 201); 
 
-       // return response()->json(['message' => 'Registration successful. Please check your email for verification link.'], 201);
     }
 
-
-
-    public function verifyEmail(EmailVerificationRequest $request)
-     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return [
-                'message' => 'Email already verified'
-            ];
-        }
-        $request->fulfill();
-        return response()->json(['message' => 'Email verified successfully.'], 200);
-    }
-    // public function verify(EmailVerificationRequest $request)
-    // {
+    // public function verifyEmail(EmailVerificationRequest $request)
+    //  {
     //     if ($request->user()->hasVerifiedEmail()) {
-    //         return [   'message' => 'Email already verified'     ];
+    //         return [
+    //             'message' => 'Email already verified'
+    //         ];
     //     }
-
-    //     if ($request->user()->markEmailAsVerified()) {
-    //         event(new Verified($request->user()));
-                // }
-
-    //     return [      'message'=>'Email has been verified' ];
+    //     $request->fulfill();
+    //     return response()->json(['message' => 'Email verified successfully.'], 200);
     // }
+
+    public function verifyEmail($id, $hash)
+    {
+        $user = User::find($id);
+        abort_if(!$user, 405);
+        abort_if(!hash_equals($hash, sha1($user->getEmailForVerification())), 405);
+
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            event(new Verified($user));        
+            }
+            return [   'message' => 'Email verified', 'status'=>true     ];
+        
+    }
   
       // Show Login Form
       public function login(Request $request) {
@@ -98,8 +97,7 @@ class AuthController extends Controller
 
     // Logout User
     public function logout(Request $request) {
-       auth()->user()->tokens()->delete();
-       //$request->user()->currentAccessToken()->delete();
+       $request->user()->currentAccessToken()->delete();
        
         return [
             'message' => 'Logged out'
